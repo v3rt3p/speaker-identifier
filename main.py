@@ -61,7 +61,7 @@ class FunctionCallPayload(BaseModel):
     metadata: str
     sessionId: str
     name: str
-    parameters: dict
+    arguments: dict
 
 
 def save_voice_sample_enrollment(sessionId: str, meta: dict):
@@ -226,7 +226,7 @@ async def list_functions():
 async def update_function(payload: FunctionCallPayload):
     try:
         name = payload.name
-        params = payload.parameters or {}
+        params = payload.arguments or {}
         if name == "save_voice_sample_enrollment":
             save_voice_sample_enrollment(payload.sessionId, payload.metadata)
             return Response(status_code=200)
