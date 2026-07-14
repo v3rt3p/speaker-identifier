@@ -264,7 +264,7 @@ def speaker_model_cache_dir() -> str:
         "QWEN3_ASR_EMBEDDER_CACHE",
         os.getenv(
             "SPEAKER_MODEL_CACHE_DIR",
-            ".speaker_models/qwen3-asr-audio-encoder",
+            "pretrained_models/qwen3-asr-audio-encoder",
         ),
     )
 
