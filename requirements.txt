@@ -3,7 +3,9 @@ numpy
 fastapi
 pydantic
 uvicorn
-vosk
-nemo_toolkit[asr]
-tensorflow
-kaldi-native-fbank
+requests
+soundfile
+qwen-asr==0.0.6
+safetensors>=0.4
+torch>=2.2
+torchaudio>=2.2
