@@ -1,28 +1,24 @@
-# alice-speaker-identifier
+# speaker-identifier
 
-Simple Speaker Identifier for alice-processor using the same Qwen3-ASR
-audio-encoder embeddings as the ASR service.
+FastAPI-сервис embeddings и проверки говорящего на Qwen3-ASR audio encoder. Функция экспериментальная и не заменяет надежную аутентификацию без калибровки.
 
-Enrollment and matching mirror the SepFormer UI verifier: they use normalized
-mean/std pooled embeddings from `Qwen/Qwen3-ASR-0.6B` by default, average
-repeated enrollment embeddings into a persistent profile, and accept the best
-speaker only when it passes `SPEAKER_VERIFICATION_THRESHOLD` and is at least
-`SPEAKER_VERIFICATION_MIN_MARGIN` above the second-best speaker.
+## Docker Compose
 
-Profiles use the versioned `data/qwen3_asr_enrollments.json` schema by default.
-The previous dictionary-based `speaker_embeddings.json` format is read and
-migrated on the next successful enrollment. Configure either
-`QWEN3_ASR_ENROLLMENT_STORE` or the legacy `SPEAKER_EMBEDDINGS_FILE` to override
-the path.
+```bash
+docker compose build speaker-identifier
+docker compose up -d speaker-identifier
+curl http://localhost:9010/docs
+```
 
-Defaults match the current verifier:
+Standalone: `docker build -t speaker-identifier . && docker run --rm -p 9010:9010 -v speaker-models:/app/pretrained_models -v speaker-data:/app/data speaker-identifier`.
 
-- similarity threshold: `0.75`
-- minimum best-vs-second margin: `0.05`
-- minimum verification segment: `1.0` second of mono PCM16 at 16 kHz
+## Переменные и данные
 
-`POST /audio-metadata` keeps the existing `recordId` and `speakerId` fields and
-adds `speakerVerification` diagnostics whenever there is a compatible profile.
-Qwen3-ASR embeddings are experimental for speaker identity; thresholds should
-be calibrated with target and impostor recordings from the deployment audio
-path before treating a match as authentication.
+- `HOST` (default `0.0.0.0`), `PORT` (default `9010`)
+- `QWEN3_ASR_ENROLLMENT_STORE` — persistent JSON профилей
+- `VOICEPRINTS_DIR` — необязательно, raw voiceprints
+- `QWEN3_ASR_EMBEDDER_MODEL` (default `Qwen/Qwen3-ASR-0.6B`)
+- `QWEN3_ASR_EMBEDDER_CACHE`, `QWEN3_ASR_EMBEDDER_DEVICE`
+- `SPEAKER_VERIFICATION_THRESHOLD` (default `0.75`) и `SPEAKER_VERIFICATION_MIN_MARGIN` (default `0.05`)
+
+Модель скачивается с Hugging Face при первом старте. Persistent volumes обязательны, иначе профили и cache будут потеряны. Основные endpoints: `POST /audio-metadata`, `GET/PATCH /functions`, `GET /saved-embeddings`, `PUT/POST /state`.
